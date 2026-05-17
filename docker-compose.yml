@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # 위협 정보 공유용 Redis DB
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # 파이썬으로 직접 만들 로드밸런서 1번
+  lb1:
+    build: ./load_balancer
+    ports:
+      - "8081:80"
+    depends_on:
+      - redis
+
+  # 파이썬으로 직접 만들 로드밸런서 2번
+  lb2:
+    build: ./load_balancer
+    ports:
+      - "8082:80"
+    depends_on:
+      - redis
+
+  # 정상 요청을 받아줄 더미 웹 서버 2대
+  web1:
+    image: nginx:alpine
+  web2:
+    image: nginx:alpine
