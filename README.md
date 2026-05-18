@@ -33,10 +33,10 @@ python3 attacker.py
 
 # 3. 방어망 동기화 상태 모니터링 (웹 브라우저 접속)
 http://localhost:8081/admin/redis-status
+```
 
 
-
-##💡 한계점 및 고도화 과제 (Improvements & Future Work)
+## 💡 한계점 및 고도화 과제 (Improvements & Future Work)
 본 프로젝트는 PoC(개념 증명) 단계로, 향후 실제 엔터프라이즈 환경 적용을 위해 다음과 같은 아키텍처 고도화를 계획하고 있습니다.
 
 # 1. 공격자 우회 및 시스템 무력화 대응 (Security Hardening)
