@@ -106,23 +106,33 @@ def proxy(path):
     if count > 5:
         encrypted_sig = encrypt_signature(signature)
         db.sadd("global_threat_signatures", encrypted_sig)
-        return f"💀 [제로 트러스트 경보] 신규 위협 탐지! 시그니처를 AES-GCM으로 암호화하여 타 노드에 전파했습니다.", 403
+        return f"💀 [경보] 신규 위협 탐지! 시그니처를 AES-GCM으로 암호화하여 타 노드에 전파했습니다.", 403
 
-    target = BACKENDS[turn]
-    turn = (turn + 1) % len(BACKENDS)
-    
-    try:
-        resp = requests.request(
-            method=request.method,
-            url=f"{target}/{path}",
-            headers={key: value for (key, value) in request.headers if key != 'Host'},
-            data=request.get_data(),
-            cookies=request.cookies,
-            allow_redirects=False
-        )
-        return f"✅ 정상 접속 (IP: {client_ip}) -> {target} 서버가 처리함"
-    except:
-        return f"❌ {target} 서버 연결 실패", 502
+    # 4. 🔀 지능형 로드밸런싱 (Round Robin + Failover)
+    for _ in range(len(BACKENDS)):
+        target = BACKENDS[turn]
+        turn = (turn + 1) % len(BACKENDS)
+        
+        try:
+            # 타겟 백엔드로 실제 요청 전달 (3초 타임아웃)
+            resp = requests.request(
+                method=request.method,
+                url=f"{target}/{path}",
+                headers={key: value for (key, value) in request.headers if key != 'Host'},
+                data=request.get_data(),
+                cookies=request.cookies,
+                timeout=3, 
+                allow_redirects=False
+            )
+            # 성공하면 트래픽을 어느 서버가 처리했는지 명확하게 표시!
+            return f"✅ 정상 트래픽 통과\n🔀 트래픽 분산: {target} 노드가 처리함\n📄 백엔드 응답: {resp.text}"
+            
+        except requests.exceptions.RequestException:
+            # 이 서버가 죽었거나 응답이 없다면? 당황하지 않고 다음 서버(for문)로 넘어감!
+            continue
+            
+    # 모든 백엔드 서버가 죽었을 경우에만 에러 출력
+    return "❌ [장애 발생] 연결 가능한 모든 백엔드 서버가 다운되었습니다 (503 Service Unavailable)", 503
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
