@@ -23,8 +23,11 @@ services:
     depends_on:
       - redis
 
-  # 정상 요청을 받아줄 더미 웹 서버 2대
+  # --- (기존 redis, lb1, lb2 등등 아래에 추가) ---
   web1:
-    image: nginx:alpine
+    image: python:3.9-alpine
+    command: sh -c "echo 'Hello! I am Backend Server [WEB-1] 🟢' > index.html && python -m http.server 80"
+
   web2:
-    image: nginx:alpine
+    image: python:3.9-alpine
+    command: sh -c "echo 'Hello! I am Backend Server [WEB-2] 🔵' > index.html && python -m http.server 80"
