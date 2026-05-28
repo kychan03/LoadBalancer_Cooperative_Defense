@@ -124,9 +124,8 @@ def proxy(path):
                 timeout=3, 
                 allow_redirects=False
             )
-            # 성공하면 트래픽을 어느 서버가 처리했는지 명확하게 표시!
-            return f"✅ 정상 트래픽 통과\n🔀 트래픽 분산: {target} 노드가 처리함\n📄 백엔드 응답: {resp.text}"
-            
+            # [수정됨] 지저분한 HTML 응답(resp.text)을 빼고, 어느 서버로 분산되었는지만 깔끔하게 출력!
+            return f"✅ 정상 트래픽 통과 🔀 [{target}] 서버가 안전하게 처리함!"            
         except requests.exceptions.RequestException:
             # 이 서버가 죽었거나 응답이 없다면? 당황하지 않고 다음 서버(for문)로 넘어감!
             continue
